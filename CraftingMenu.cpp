@@ -254,11 +254,11 @@ namespace GOTHIC_ENGINE {
                 //If cursor is hovering over an ingredient, update the vars to render ingr name later below
                 if (IsCursorHovering(ingrBtn)) {
                     renderIngrLabel = true;
-                    //Option 1
+                    //Option 1 - name label displayed to the left as much as needed, if it would be off screen
                     //renderIngrLabelX = ingrPosX + bgPosOffsetX + ingrSizeX / 2;
                     //int offsetXIfOffScreen = renderIngrLabelX + 1250 - 8192;
                     //renderIngrLabelX = offsetXIfOffScreen > 0 ? renderIngrLabelX - offsetXIfOffScreen : renderIngrLabelX;
-                    //Option 2
+                    //Option 2 - name label always displayed in the middle
                     renderIngrLabelX = ingrPosX + bgPosOffsetY + ingrSizeX / 2 - 1250 / 2;
                     renderIngrLabelY = ingrPosY + bgPosOffsetY - ingrSizeY / 2;
                     renderIngrLabelName = ingr->description;
@@ -279,27 +279,7 @@ namespace GOTHIC_ENGINE {
     }
 
 
-    void FillReqsFromString(C_RECIPE* recipe) {
-        Array<zSTRING>* reqs = new Array<zSTRING>();
-        SplitString(recipe->req_items, "|", *reqs);
-        for (int i = 0; i < reqs->GetNum(); i++) {
-            TrimString(*reqs->GetSafe(i));
-            Array<zSTRING> req_itmNum;
-            SplitString(reqs->GetSafe(i), ":", req_itmNum);
-            zSTRING itm = req_itmNum.GetSafe(0);
-            zSTRING numAsStr = req_itmNum.GetSafe(1);
-            TrimString(itm);
-            TrimString(numAsStr);
-
-            int num = numAsStr.ToInt32();
-            recipe->requirements->Insert(itm, num);
-
-            //If I want to insert from Strings to req_itm and req_qty
-            //int instance = parser->GetIndex(itm);
-            //recipe->req_itm[i] = instance;
-            //recipe->req_qty[i] = num;
-        }
-    }
+    
 
     void CraftingView::Update() {
         if (!isOpen) return;
@@ -317,7 +297,7 @@ namespace GOTHIC_ENGINE {
 
     void CraftingView::Open_Alchemy() {
         isOpen = true;
-        view->InsertBack("AlchemyScreen_Background_New.tga");
+        view->InsertBack("AlchemyScreen_Background_1.tga");
 
         screen->InsertItem(view);
         view->Blit();
@@ -329,99 +309,6 @@ namespace GOTHIC_ENGINE {
             knownRecipes_Instances->InsertEnd(knownRecipes_parser[i]);
             knownRecipes->InsertEnd(C_RECIPE(knownRecipes_parser[i]));
         }
-        for (int i = 0; i < 10; i++) {
-            oCItem* itm = new oCItem((zSTRING)"ItPo_Mana_02", 1);
-            requiredItems->InsertEnd(*itm);
-        }
-
-
-        //knownRecipes->InsertEnd(C_RECIPE("RECIPE_ItPo_Mana_02"));
-        //knownRecipes->InsertEnd(C_RECIPE("RECIPE_ItPo_Health_02"));
-        //knownRecipes->InsertEnd(C_RECIPE("RECIPE_ItPo_Perm_Dex"));
-        knownRecipesMap->Insert("RECIPE_ItPo_Mana_02", C_RECIPE("RECIPE_ItPo_Mana_02"));
-        knownRecipesMap->Insert("RECIPE_ItPo_Health_02", C_RECIPE("RECIPE_ItPo_Health_02"));
-        knownRecipesMap->Insert("RECIPE_ItPo_Perm_Dex", C_RECIPE("RECIPE_ItPo_Perm_Dex"));
-        
-        C_RECIPE* recipe0 = knownRecipes->GetSafe(0);
-        oCItem* it00 = new oCItem(recipe0->req_itm[0], 1);
-        oCItem* it10 = new oCItem(recipe0->req_itm[1], 1);
-        oCItem* it20 = new oCItem(recipe0->req_itm[2], 1);
-        oCItem* it30 = new oCItem(recipe0->req_itm[3], 1);
-        oCItem* it40 = new oCItem(recipe0->req_itm[4], 1);
-
-        C_RECIPE* recipe1 = knownRecipes->GetSafe(1);
-        oCItem* it01 = new oCItem(recipe1->req_itm[0], 1);
-        oCItem* it11 = new oCItem(recipe1->req_itm[1], 1);
-        oCItem* it21 = new oCItem(recipe1->req_itm[2], 1);
-        oCItem* it31 = new oCItem(recipe1->req_itm[3], 1);
-        oCItem* it41 = new oCItem(recipe1->req_itm[4], 1);
-
-        C_RECIPE* recipe = knownRecipes->GetSafe(2);
-        oCItem* it0 = new oCItem(recipe->req_itm[0], 1);
-        oCItem* it1 = new oCItem(recipe->req_itm[1], 1);
-        oCItem* it2 = new oCItem(recipe->req_itm[2], 1);
-        oCItem* it3 = new oCItem(recipe->req_itm[3], 1);
-        oCItem* it4 = new oCItem(recipe->req_itm[4], 1);
-
-        
-
-        /*int func_Render_AddItem = parser->GetIndex("Render_AddItem");
-        int func_Render_OpenView = parser->GetIndex("Render_OpenView");
-        int itInd_Mana_02 = parser->GetIndex("ItPo_Mana_02");
-        int renderItem;
-        renderItem = *(int*)parser->CallFunc(func_Render_AddItem, itInd_Mana_02, 0, 0, 4000, 4000);
-        parser->CallFunc(func_Render_OpenView, renderItem);*/
-
-
-        Array<zSTRING> potionCategories;
-        potionCategories.Insert("Uzdrawiaj¹ce");
-        potionCategories.Insert("Mana");
-        potionCategories.Insert("Trwa³e");
-        potionCategories.Insert("Czasowe");
-        potionCategories.Insert("Inne");
-
-
-
-        //for (int i = 0; i < alchemyLevels.GetNum(); i++) {
-        //    Menu_Button* lvlTab = new Menu_Button(navBar_x, navBar_y + (btnSizeY + GAPY) * i, alchemyLevels[i]);
-        //    lvlTab->name = "Alchemy_Tab_" + (zSTRING)(i + 1);
-        //    childsArray.Insert(lvlTab);
-        //    //view->InsertItem(lvlTab->view);
-        //}
-
-        //Displaying a miniature - remove it from here
-
-        //oCWorld* gameworld = Gothic::Game::Session->GetGameWorld();
-        //zCVob* miniature = new zCVob();
-        //oCItem* item = nullptr;
-        //miniature->dontWriteIntoArchive = True;
-        //Gothic::Game::Session->GetGameWorld()->AddVob(miniature);	
-        ////miniature->Release();
-        //zVEC3 playerPos = player->GetPositionWorld();
-        //zVEC3 newMiniaturePos = playerPos + zVEC3(0.0f, 150.0f, 0.0f);
-        //miniature->SetPositionWorld(newMiniaturePos);
-        ////auto pot = parser->GetSymbol("ItPo_Mana_01");
-        ////auto pot = zCObject::CreateNewInstance("ItPo_Mana_01");
-        ////auto pot = player->IsInInv("ItPo_Mana_01", 1);
-        //oCItem* pot = new oCItem((zSTRING)"ItPo_Mana_01", 1);
-        //    //class oCItem* __thiscall oCNpcInventory::IsIn(class zSTRING const&, int)
-        //    //class oCItem * __thiscall oCObjectFactory::CreateItem(int)
-        //    //static class zCObject * __cdecl zCObject::CreateNewInstance(class zSTRING const &)
-        //    //class zCObject * __thiscall zCClassDef::SearchHashTable(class zSTRING const &)
-        //pot->CreateVisual();
-        //zCVisual* visual = pot->GetVisual();
-        //miniature->SetVisual(visual);
-        //miniature->GetScreenBBox2D().Draw();
-        //
-        ////Get subscale
-        //zTBBox3D bbox = visual->GetBBox3D();						//Object's 'volume' - rectangle encompassing it
-        //float length = (bbox.maxs - bbox.mins).Length();			//Diagonal length
-        //float vobSizeMult = SafeDiv(1.0f, length) * 50.0f;		    //We divide the vob by its length and then multiply by bestSize
-        //zMAT4& trafo = miniature->GetNewTrafoObjToWorld();			//zMAT4 matrix, taken by reference for easier modification
-        ////Reset and rescale
-        //trafo.MakeIdentity();										//Reset the matrix (?) - why doesn't the object get distorted then?
-        //trafo.PreScale(vobSizeMult);								//Apply the scale along all three axes
-
 
         CursorStatic::Show();
 
@@ -449,5 +336,27 @@ namespace GOTHIC_ENGINE {
         zCView* nextChild = child->next;                   //This points to the next object in the 'childs' list (needs to be here, as for a strange reason child->next changes after the function is called on the child)
         (child->*funcPtr)();                               //Call the desired function
         CallFuncForEachChild(nextChild, funcPtr);          //Call the same function on the next object
+    }
+
+    void FillReqsFromString(C_RECIPE* recipe) {
+        Array<zSTRING>* reqs = new Array<zSTRING>();
+        SplitString(recipe->req_items, "|", *reqs);
+        for (int i = 0; i < reqs->GetNum(); i++) {
+            TrimString(*reqs->GetSafe(i));
+            Array<zSTRING> req_itmNum;
+            SplitString(reqs->GetSafe(i), ":", req_itmNum);
+            zSTRING itm = req_itmNum.GetSafe(0);
+            zSTRING numAsStr = req_itmNum.GetSafe(1);
+            TrimString(itm);
+            TrimString(numAsStr);
+
+            int num = numAsStr.ToInt32();
+            recipe->requirements->Insert(itm, num);
+
+            //If I want to insert from Strings to req_itm and req_qty
+            //int instance = parser->GetIndex(itm);
+            //recipe->req_itm[i] = instance;
+            //recipe->req_qty[i] = num;
+        }
     }
 }

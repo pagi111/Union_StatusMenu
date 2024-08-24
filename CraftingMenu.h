@@ -28,13 +28,10 @@ namespace GOTHIC_ENGINE {
         C_RECIPE(zSTRING recipeName);
         C_RECIPE(int recipeInstance);
     };
-    Array<C_RECIPE>* knownRecipes2 = new Array<C_RECIPE>();
-    MapArray<zSTRING, C_RECIPE>* knownRecipesMap = new MapArray<zSTRING, C_RECIPE>();
     
     Array<int>* knownRecipes_Instances = new Array<int>();
     Array<C_RECIPE>* knownRecipes = new Array<C_RECIPE>();
 
-    Array<oCItem>* requiredItems = new Array<oCItem>();
 
 
     class Menu_Text {

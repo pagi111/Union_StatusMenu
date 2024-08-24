@@ -141,6 +141,18 @@ namespace GOTHIC_ENGINE {
             parser->CallFunc(funcInd, itemInd, itemInd2);*/
 
         }
+        else if (zinput->KeyToggled(KEY_5)) {
+            CraftingView::view->InsertBack("AlchemyScreen_Background_1.tga");
+        }
+        else if (zinput->KeyToggled(KEY_6)) {
+            CraftingView::view->InsertBack("AlchemyScreen_Background_2.tga");
+        }
+        else if (zinput->KeyToggled(KEY_7)) {
+            CraftingView::view->InsertBack("AlchemyScreen_Background_3.tga");
+        }
+        else if (zinput->KeyToggled(KEY_8)) {
+            CraftingView::view->InsertBack("AlchemyScreen_Background_4.tga");
+        }
         
     }
 
