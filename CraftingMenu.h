@@ -16,8 +16,8 @@ namespace GOTHIC_ENGINE {
         RECIPETYPE  type;                   //RECIPETYPE::ALCHEMY, ::SMITH, etc.
         int 	    level;                  //Level of the skill required to use learn this recipe
         int	        create_item;            //Instance of the item to create (as int) - from scripts
-        int 	    req_itm[10];		    //Instances of required items
-        int 	    req_qty[10];            //Number of each item required
+        int 	    req_itm[9];		        //Instances of required items
+        int 	    req_qty[9];             //Number of each item required
         zSTRING     req_items;              //Required items with their numbers (syntax: itemName1: quantity1 | itemName2 : quantity2 |itemName3: quantity3 ... - spaces don't matter)
 
         //Additional fields (not present in Daedalus)

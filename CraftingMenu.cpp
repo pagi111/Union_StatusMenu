@@ -213,25 +213,25 @@ namespace GOTHIC_ENGINE {
 
             //Ingredients required for the recipe
             bool renderIngrLabel = false;
-            float renderIngrLabelX = 0;
-            float renderIngrLabelY = 0;
+            int renderIngrLabelX = 0;
+            int renderIngrLabelY = 0;
             zSTRING renderIngrLabelName = "";
 
             int i = 0;
-            while (selRec->req_itm[i] > 0) {
+            while (selRec->req_itm[i] > 0 && i < 9) {
                 int instance = selRec->req_itm[i];
                 //oCItem* item = new oCItem(requiredItems->GetSafe(i)->instanz, 1); //Same as above
                 //RenderButton(ingrBasePosX + (itmSizeX * 0.30) + gapX * i, ingrBasePosY + (itmSizeY * 0.15), itmSizeX / 2.5, itmSizeY / 1.25);
                 //RenderItem(instance, ingrBasePosX + gapX * i, ingrBasePosY, itmSizeX*0.6, itmSizeY*0.6);
                 
                 //Values for displaying required ingredients in a circle
-                float ingrPosX = itmCenterX + radius * sin(3.14 + 6.28f / 9.0f * i);
-                float ingrPosY = itmCenterY + radius * 1.78f * cos(3.14 + 6.28f / 9.0f * i);
-                float ingrSizeX = itmSizeX * 0.6;
-                float ingrSizeY = itmSizeY * 0.6;
+                int ingrPosX = itmCenterX + radius * sin(3.14 + 6.28f / 9.0f * i);
+                int ingrPosY = itmCenterY + radius * 1.78f * cos(3.14 + 6.28f / 9.0f * i);
+                int ingrSizeX = itmSizeX * 0.6;
+                int ingrSizeY = itmSizeY * 0.6;
                 float bgSizeMult = 0.90f;
-                float bgPosOffsetX = ingrSizeX * (1 - bgSizeMult) / 2.0f; //If we make bg smaller, then we need to add to the pos the difference between ingr size and bg size and then divide it by 2
-                float bgPosOffsetY = ingrSizeY * (1 - bgSizeMult) / 2.0f;
+                int bgPosOffsetX = ingrSizeX * (1 - bgSizeMult) / 2.0f; //If we make bg smaller, then we need to add to the pos the difference between ingr size and bg size and then divide it by 2
+                int bgPosOffsetY = ingrSizeY * (1 - bgSizeMult) / 2.0f;
 
                 Menu_Button::defaultBackTex = "AlchemyScreen_Ingr_Bg.tga";
                 Menu_Button* ingrBtn = new Menu_Button(ingrPosX + bgPosOffsetX, ingrPosY + bgPosOffsetY, ingrSizeX * bgSizeMult, ingrSizeY * bgSizeMult);
@@ -249,7 +249,7 @@ namespace GOTHIC_ENGINE {
                 RenderButton(ingrBtn);
 
                 oCItem* ingr = new oCItem(instance, 1);
-                RenderItem(ingr, ingrPosX, ingrPosY, ingrSizeX, ingrSizeY);
+                CraftingView::RenderItem(ingr, ingrPosX, ingrPosY, ingrSizeX, ingrSizeY);
                 
                 //If cursor is hovering over an ingredient, update the vars to render ingr name later below
                 if (IsCursorHovering(ingrBtn)) {
