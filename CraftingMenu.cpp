@@ -8,12 +8,15 @@ namespace GOTHIC_ENGINE {
     int navBar_y = 500;
     int btnSizeX = Menu_Button::defaultSizeX;
     int btnSizeY = Menu_Button::defaultSizeY;
+    zCView* textBtnView = new zCView();
+    Menu_Button* testBtn = new Menu_Button();
     Menu_TextView* txtV_ItemStats;
-    zCOLOR col_Orange = zCOLOR(255, 100, 0);        //Ingredient name on label
-    zCOLOR col_RedDark = zCOLOR(167, 11, 11);       //If not enough ingredients
-    zCOLOR col_Green = zCOLOR(22, 114, 22);         //If enough ingredients
-    zCOLOR col_BrownDark = zCOLOR(90, 51, 39);      //Item Name
-    zCOLOR col_BrownLight = zCOLOR(120, 71, 50);    //Item Stats
+    zCOLOR col_Orange = zCOLOR(255, 100, 0);            //Ingredient name on label
+    zCOLOR col_RedDark = zCOLOR(167, 11, 11);           //If not enough ingredients
+    zCOLOR col_Green = zCOLOR(22, 114, 22);             //If enough ingredients
+    zCOLOR col_BrownDark = zCOLOR(90, 51, 39);          //Item Name
+    zCOLOR col_BrownLight = zCOLOR(120, 71, 50);        //Item Stats
+    zCOLOR col_Transparent = zCOLOR(255, 255, 255);     //Transparent
 
     C_RECIPE::C_RECIPE(zSTRING recipeName) {
         int recipeInd = parser->GetIndex(recipeName);   //Get instance index from parser
@@ -169,8 +172,63 @@ namespace GOTHIC_ENGINE {
         int itmCenterX = 6725;
         int itmCenterY = 2175;
         int radius = 600;
-        
-        
+        //Tab values
+        int tabPosX = 500;
+        int tabPosY = 300;
+        int tabSizeX = 250;
+        int tabSizeY = 370;
+
+
+        //Render tabs
+        for (int i = 0; i < 5; i++) {
+            //Working
+            //Menu_Button::defaultBackTex = "AlchemyScreen_Tab_Dark.tga";
+            //Menu_Button* btn = new Menu_Button(tabPosX + i * (tabSizeX - 10), tabPosY, tabSizeX, tabSizeY);
+
+            //if (IsCursorHovering(btn)) {
+            //    //btn->view->InsertBack("AlchemyScreen_Tab_Light.tga");
+            //    btn->view->SetColor(col_Transparent);
+            //}
+            //else {
+            //    //btn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
+            //    btn->view->SetColor(zCOLOR(200, 165, 110));
+            //}
+
+            //CraftingView::RenderButton(btn);
+            //delete btn;
+
+            //Test View - working
+            //textBtnView->InsertBack("AlchemyScreen_Tab_Dark.tga");
+            //textBtnView->SetPos(tabPosX + i * (tabSizeX - 10), tabPosY);
+            //textBtnView->SetSize(tabSizeX, tabSizeY);
+            //if (IsCursorHovering(textBtnView)) {
+            //    //btn->view->InsertBack("AlchemyScreen_Tab_Light.tga");
+            //    textBtnView->SetColor(col_Transparent);
+            //}
+            //else {
+            //    //btn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
+            //    textBtnView->SetColor(zCOLOR(200, 165, 110));
+            //}
+            //view->InsertItem(textBtnView);
+            //textBtnView->Blit();
+            //view->RemoveItem(textBtnView);
+
+            //Test Btn
+            testBtn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
+            testBtn->view->SetPos(tabPosX + i * (tabSizeX - 10), tabPosY);
+            testBtn->view->SetSize(tabSizeX, tabSizeY);
+            if (IsCursorHovering(testBtn)) {
+                //btn->view->InsertBack("AlchemyScreen_Tab_Light.tga");
+                testBtn->view->SetColor(col_Transparent);
+            }
+            else {
+                //btn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
+                testBtn->view->SetColor(zCOLOR(200, 165, 110));
+            }
+            CraftingView::RenderButton(testBtn);
+
+        }
+
         //Render item for each known recipe (left side of the screen)
         for (int i = 0; i < knownRecipes->GetNum(); i++) {
             Menu_Button::defaultBackTex = "AlchemyScreen_Item_Bg.tga";

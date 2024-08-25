@@ -72,8 +72,6 @@ namespace GOTHIC_ENGINE {
         inline static int defaultTextOffsetX = 3500;    //Each zCView dimension is always 8192, so 4096 would be in the middle of the zCView
         inline static int defaultTextOffsetY = 2500;    //Each zCView dimension is always 8192, so 4096 would be in the middle of the zCView
         inline static zSTRING defaultBackTex = "AlchemyScreen_Tab2_Dark.tga";
-        
-        bool hovered = false, clicked = false, selected = false;
 
         Menu_Button();
         Menu_Button(int posX, int posY, zSTRING text, zCOLOR textColor);
@@ -82,16 +80,34 @@ namespace GOTHIC_ENGINE {
 
     };
     
-    bool IsCursorHovering(Menu_Button* btn) {
-        if (CursorStatic::x > btn->posX && CursorStatic::x < btn->posX + btn->sizeX &&
-            CursorStatic::y > btn->posY && CursorStatic::y < btn->posY + btn->sizeY) {
-            btn->hovered = true;
+    bool IsCursorHovering(zCView* view) {
+        if (CursorStatic::x > view->vposx && CursorStatic::x < view->vposx + view->vsizex &&
+            CursorStatic::y > view->vposy && CursorStatic::y < view->vposy + view->vsizey) {
             return true;
         }
-        else {
-            btn->hovered = false;
-            return false;
+        return false;
+    }
+
+    bool IsCursorHovering(Menu_Button* btn) {
+        return IsCursorHovering(btn->view);
+    }
+
+    //mouseButton: -1 - any mouse button; 0 - left (default); 1 - right; 2 - middle; 
+    bool IsClicked(zCView* view, int mouseButton = 0) {
+        if (mouseButton == 0 || mouseButton == -1) {
+            return (IsCursorHovering(view) && zinput->GetMouseButtonToggledLeft() == true);
         }
+        else if (mouseButton == 1 || mouseButton == -1) {
+            return (IsCursorHovering(view) && zinput->GetMouseButtonToggledRight() == true);
+        }
+        else if (mouseButton == 2 || mouseButton == -1) {
+            return (IsCursorHovering(view) && zinput->GetMouseButtonToggledMid() == true);
+        }
+        return false;
+    }
+    //mouseButton: -1 - any mouse button; 0 - left (default); 1 - right; 2 - middle; 
+    bool IsClicked(Menu_Button* btn, int mouseButton = 0) {
+        return IsClicked(btn->view, mouseButton);
     }
 
 
