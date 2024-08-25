@@ -110,42 +110,6 @@ namespace GOTHIC_ENGINE {
         return IsClicked(btn->view, mouseButton);
     }
 
-
-    class CraftingView {
-    public:
-
-        inline static zCView* view = new zCView(0, 0, 8192, 8192);
-        inline static zList<zCView>& childs = view->childs;
-        inline static Array<Menu_Button*> childsArray;
-        //inline static Map<int, zSTRING> map;
-
-        inline static bool isOpen = false;
-        inline static bool potBtnCreated = false;
-        inline static zCWorld* renderItem_World;
-        inline static int selectedRecipeInd = -1;
-
-        static void Init();
-        static void RenderButton(int posX, int posY, int sizeX, int sizeY, zSTRING text, zCOLOR textColor);
-        static void RenderButton(Menu_Button* btn);
-        static void RenderText(zSTRING text, int posX, int posY, zCOLOR color, zSTRING font, int fontHeight);
-        static void RenderItem(oCItem* item, int posX, int posY, int sizeX, int sizeY);
-        static void RenderItem(zSTRING itemName, int posX, int posY, int sizeX, int sizeY);
-        static void RenderItem(int itemInstance, int posX, int posY, int sizeX, int sizeY);
-        static void Update_Alchemy();
-        static void Update();
-        static void Open_Alchemy();
-        static void Close();
-
-        //This function calls a function (by function pointer) for each child of this zCView (in zCView::childs)
-        //Arguments:
-        //  child:            this->childs.root                                     - it's the first child in the list
-        //  funcPtr:        &zCView::Open, &zCView::Close, etc.     - with exactly such syntax
-        static void CallFuncForEachChild(zCView* child, void(zCView::* funcPtr)());
-
-
-
-    };
-
     //This class serves as a View to display lines of text.
     //Create a Menu_TextView object, then use AddText - use it multiple times to add multiple lines of text. Then use Render to render all.
     class Menu_TextView {
@@ -164,7 +128,7 @@ namespace GOTHIC_ENGINE {
         //It's also not possible to add each text with the same font but different height as the texts get rendered in another method and with the font height that was specified as last.
         zCViewText* AddText(zSTRING text, int posX, int posY, zCOLOR color = zCOLOR(255, 255, 255, 255), zSTRING font = "Font_Default.tga", int fontHeight = 0) {
             zCViewText* t = new zCViewText();
-            zCFont* f;  
+            zCFont* f;
 
             //If I wanted to load a new font, I could use font.LoadFontTexture(font_name); - but this takes a lot of time
             //And should not be used in an every-frame function. But usually it's better to use zfontman (global font manager) to search fonts, like below.
@@ -198,6 +162,64 @@ namespace GOTHIC_ENGINE {
             textView->textLines.DeleteList();
         }
     };
+
+    class CraftingScreen {
+    public:
+        zCView* view;
+        zCWorld* renderItem_World;
+        int selectedRecipeInd = -1;
+        Menu_TextView* txtV_ItemStats;
+
+        CraftingScreen();
+
+        //Values for item rendering:
+        int gapX = 350;             //Gap between items
+        int itmBasePosX = 100;      //For recipe item (left side of the screen)
+        int itmBasePosY = 1300;
+        int ingrBasePosX = 6000;    //6000 //For ingredients (right side of the screen)
+        int ingrBasePosY = 1800;    //5600
+        int itmSizeX = 750;         //Size is the same for recipe item and ingredients (for now at least)
+        int itmSizeY = 1100;
+        //Values for rendering a box(button, background) for an item model:
+        //Box will be a bit bigger than the model, but sometimes may be too small: PosX: + (sizeX * 0.18), PosY: no change, SizeX: sizeX / 1.5, SizeY: sizeY / 1.05
+        //Box will fit the model a bit more tightly, so it may be too small: PosX: + (sizeX * 0.2), PosY: + (sizeY * 0.05), SizeX: sizeX / 1.7, SizeY: sizeY / 1.15
+        //Best fit (a bit smaller than the model): PosX: + (sizeX * 0.30), PosY: + (sizeY * 0.15), SizeX: sizeX / 2.5, SizeY: sizeY / 1.25
+        //Box smaller than the model and square in shape: PosX: + (sizeX * 0.28), PosY: + (sizeY * 0.28), SizeX: sizeX / 2.4, SizeY: sizeY / 2.0
+        float boxPosXOffsetMult = 0.28;
+        float boxPosYOffsetMult = 0.28;
+        float boxSizeXDivide = 2.4;
+        float boxSizeYDivide = 2.0;
+        //Values for displaying info about chosen item to craft:
+        int itmNamePosX = 6300;     //6600
+        int itmNamePosY = 750;     //200
+        int itmStatsPosY = 3900;     //700
+        int itmTextPosX = 6100;     //6500
+        int itmCountPosX = 7600;    //7850
+        int itmCenterX = 6725;
+        int itmCenterY = 2175;
+        int radius = 600;
+        //Tab values
+        int tabPosX = 500;
+        int tabPosY = 300;
+        int tabSizeX = 250;
+        int tabSizeY = 370;
+
+        void Update_Alchemy();
+        void RenderButton(int posX, int posY, int sizeX, int sizeY, zSTRING text, zCOLOR textColor);
+        void RenderButton(Menu_Button* btn);
+        void RenderText(zSTRING text, int posX, int posY, zCOLOR color, zSTRING font, int fontHeight);
+        void RenderItem(oCItem* item, int posX, int posY, int sizeX, int sizeY);
+        void RenderItem(zSTRING itemName, int posX, int posY, int sizeX, int sizeY);
+        void RenderItem(int itemInstance, int posX, int posY, int sizeX, int sizeY);
+        static void Update();
+        static void Open_Alchemy();
+        static void Close();
+
+
+
+    };
+    CraftingScreen* craftingScreen = nullptr;
+    
 
     class CBook : public zCInputCallback {
     public:

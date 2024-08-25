@@ -47,7 +47,6 @@ namespace GOTHIC_ENGINE {
         NewStatsMenu_ShowPlayerStats();
         isMenuOpen = true;
         CursorStatic::Show();
-        CraftingView::CallFuncForEachChild(CraftingView::childs.root, &zCView::Open);
         player->attribute[NPC_ATR_STRENGTH] += 1;
         zCPar_Symbol* sym = parser->GetSymbol("UseItPo_Mana_01");
         int ind = parser->GetIndex("UseItPo_Mana_01");
@@ -67,7 +66,6 @@ namespace GOTHIC_ENGINE {
         //screen->RemoveItem(menu_View);
         //CursorStatic::Hide();
         delete button1; button1 = nullptr;      //if I use 'delete' without assigning nullptr to the variable, the game freezes on game exit
-        CraftingView::CallFuncForEachChild(CraftingView::childs.root, &zCView::Close);
         return 0;
     }
 
@@ -102,7 +100,6 @@ namespace GOTHIC_ENGINE {
         //screen->RemoveItem(menu_View);
         //CursorStatic::Hide();
         delete button1; button1 = nullptr;      //if I use 'delete' without assigning nullptr to the variable, the game freezes on game exit
-        CraftingView::CallFuncForEachChild(CraftingView::childs.root, &zCView::Close);
 
 
     }

@@ -112,7 +112,7 @@ namespace GOTHIC_ENGINE {
             screen->Print(200, 400, "Przycisk naciœniêty: L");
             NewStatsMenu_Hide();
             //ShowCursor(1);   //Shows system cursor
-            CraftingView::Close();
+            CraftingScreen::Close();
         }
         else if (zinput->KeyToggled(KEY_K)) {
             screen->Print(200, 400, "Przycisk naciœniêty: K");
@@ -128,7 +128,7 @@ namespace GOTHIC_ENGINE {
             screen->Print(200, 400, "Przycisk naciœniêty: J");
             //EndInteractionWithMob(player);
 
-            CraftingView::Open_Alchemy();
+            CraftingScreen::Open_Alchemy();
         }
         else if (zinput->KeyToggled(KEY_U)) {
             screen->Print(200, 400, "Przycisk naciœniêty: U");
@@ -142,16 +142,16 @@ namespace GOTHIC_ENGINE {
 
         }
         else if (zinput->KeyToggled(KEY_5)) {
-            CraftingView::view->InsertBack("AlchemyScreen_Background_1.tga");
+            craftingScreen->view->InsertBack("AlchemyScreen_Background_1.tga");
         }
         else if (zinput->KeyToggled(KEY_6)) {
-            CraftingView::view->InsertBack("AlchemyScreen_Background_2.tga");
+            craftingScreen->view->InsertBack("AlchemyScreen_Background_2.tga");
         }
         else if (zinput->KeyToggled(KEY_7)) {
-            CraftingView::view->InsertBack("AlchemyScreen_Background_3.tga");
+            craftingScreen->view->InsertBack("AlchemyScreen_Background_3.tga");
         }
         else if (zinput->KeyToggled(KEY_8)) {
-            CraftingView::view->InsertBack("AlchemyScreen_Background_4.tga");
+            craftingScreen->view->InsertBack("AlchemyScreen_Background_4.tga");
         }
         
     }
@@ -162,7 +162,6 @@ namespace GOTHIC_ENGINE {
   
   void Game_Init() {
       CursorStatic::Init();
-      CraftingView::Init();
       menu_View = new zCView(0, 0, 8192, 8192);
       
 
@@ -178,9 +177,8 @@ namespace GOTHIC_ENGINE {
 
   void Game_Loop() {
       KeyPressedFunction();
-      CraftingView::Update();
+      CraftingScreen::Update();
       CursorStatic::Update();
-
 
       //Test_Render_Loop(KEY_Y);
   }

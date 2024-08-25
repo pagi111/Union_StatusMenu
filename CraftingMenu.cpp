@@ -9,8 +9,7 @@ namespace GOTHIC_ENGINE {
     int btnSizeX = Menu_Button::defaultSizeX;
     int btnSizeY = Menu_Button::defaultSizeY;
     zCView* textBtnView = new zCView();
-    Menu_Button* testBtn = new Menu_Button();
-    Menu_TextView* txtV_ItemStats;
+    //Menu_Button* testBtn = new Menu_Button();
     zCOLOR col_Orange = zCOLOR(255, 100, 0);            //Ingredient name on label
     zCOLOR col_RedDark = zCOLOR(167, 11, 11);           //If not enough ingredients
     zCOLOR col_Green = zCOLOR(22, 114, 22);             //If enough ingredients
@@ -45,20 +44,18 @@ namespace GOTHIC_ENGINE {
         view->SetSize(sizeX, sizeY);
     }
 
-    void CraftingView::Init() {
-        if (!renderItem_World) {
-            renderItem_World = zfactory->CreateWorld();
+    CraftingScreen::CraftingScreen() {
+        renderItem_World = zfactory->CreateWorld();
         #if ENGINE == Engine_G2A
             renderItem_World->m_bIsInventoryWorld = TRUE;
         #endif
-        }
 
-        txtV_ItemStats = new Menu_TextView(CraftingView::view);
-        
-
+        view = new zCView(0, 0, 8192, 8192);
+        txtV_ItemStats = new Menu_TextView(view);
     }
 
-    void CraftingView::RenderButton(Menu_Button* btn) {
+
+    void CraftingScreen::RenderButton(Menu_Button* btn) {
         Menu_Button::defaultTextOffsetX = 2500;
 
         btn->view->SetPos(btn->posX, btn->posY);
@@ -68,7 +65,7 @@ namespace GOTHIC_ENGINE {
         btn->view->Blit();
         view->RemoveItem(btn->view);
     }
-    void CraftingView::RenderButton(int posX, int posY, int sizeX, int sizeY, zSTRING text = "", zCOLOR textColor = zCOLOR(255, 255, 255)) {
+    void CraftingScreen::RenderButton(int posX, int posY, int sizeX, int sizeY, zSTRING text = "", zCOLOR textColor = zCOLOR(255, 255, 255)) {
         Menu_Button* btn = new Menu_Button(posX, posY, sizeX, sizeY, text, textColor);
 
         RenderButton(btn);
@@ -76,7 +73,7 @@ namespace GOTHIC_ENGINE {
         delete btn; btn = nullptr;
     }
     
-    void CraftingView::RenderText(zSTRING text, int posX, int posY, zCOLOR color = zCOLOR(255, 255, 255, 255), zSTRING font = "Font_Default.tga", int fontHeight = 0) {
+    void CraftingScreen::RenderText(zSTRING text, int posX, int posY, zCOLOR color = zCOLOR(255, 255, 255, 255), zSTRING font = "Font_Default.tga", int fontHeight = 0) {
         zCView v;
         zCViewText t;
         zCFont* f;
@@ -107,7 +104,7 @@ namespace GOTHIC_ENGINE {
 
     }
 
-    void CraftingView::RenderItem(oCItem* item, int posX, int posY, int sizeX, int sizeY)
+    void CraftingScreen::RenderItem(oCItem* item, int posX, int posY, int sizeX, int sizeY)
     {
         int prevRefCount = item->refCtr;
         zCView itemRenderView;
@@ -130,14 +127,14 @@ namespace GOTHIC_ENGINE {
             item->Release(); //Since RenderItem sometimes increases refCtr, sometimes not, we need to calculate by how much it has raised
         }
     }
-    void CraftingView::RenderItem(zSTRING itemName, int posX, int posY, int sizeX, int sizeY)
+    void CraftingScreen::RenderItem(zSTRING itemName, int posX, int posY, int sizeX, int sizeY)
     {
         if (oCItem* item = new oCItem(itemName, 1)) {
             RenderItem(item, posX, posY, sizeX, sizeY);
             item->Release(); //This is for new oCItem
         }
     }
-    void CraftingView::RenderItem(int itemInstance, int posX, int posY, int sizeX, int sizeY)
+    void CraftingScreen::RenderItem(int itemInstance, int posX, int posY, int sizeX, int sizeY)
     {
         if (oCItem* item = new oCItem(itemInstance, 1)) {
             RenderItem(item, posX, posY, sizeX, sizeY);
@@ -145,40 +142,7 @@ namespace GOTHIC_ENGINE {
         }
     }
 
-    void CraftingView::Update_Alchemy() {
-        //Values for item rendering:
-        int gapX = 350;             //Gap between items
-        int itmBasePosX = 100;      //For recipe item (left side of the screen)
-        int itmBasePosY = 1300;
-        int ingrBasePosX = 6000;    //6000 //For ingredients (right side of the screen)
-        int ingrBasePosY = 1800;    //5600
-        int itmSizeX = 750;         //Size is the same for recipe item and ingredients (for now at least)
-        int itmSizeY = 1100;
-        //Values for rendering a box(button, background) for an item model:
-        //Box will be a bit bigger than the model, but sometimes may be too small: PosX: + (sizeX * 0.18), PosY: no change, SizeX: sizeX / 1.5, SizeY: sizeY / 1.05
-        //Box will fit the model a bit more tightly, so it may be too small: PosX: + (sizeX * 0.2), PosY: + (sizeY * 0.05), SizeX: sizeX / 1.7, SizeY: sizeY / 1.15
-        //Best fit (a bit smaller than the model): PosX: + (sizeX * 0.30), PosY: + (sizeY * 0.15), SizeX: sizeX / 2.5, SizeY: sizeY / 1.25
-        //Box smaller than the model and square in shape: PosX: + (sizeX * 0.28), PosY: + (sizeY * 0.28), SizeX: sizeX / 2.4, SizeY: sizeY / 2.0
-        float boxPosXOffsetMult = 0.28;
-        float boxPosYOffsetMult = 0.28; 
-        float boxSizeXDivide = 2.4;
-        float boxSizeYDivide = 2.0;
-        //Values for displaying info about chosen item to craft:
-        int itmNamePosX = 6300;     //6600
-        int itmNamePosY = 750;     //200
-        int itmStatsPosY = 3900;     //700
-        int itmTextPosX = 6100;     //6500
-        int itmCountPosX = 7600;    //7850
-        int itmCenterX = 6725;
-        int itmCenterY = 2175;
-        int radius = 600;
-        //Tab values
-        int tabPosX = 500;
-        int tabPosY = 300;
-        int tabSizeX = 250;
-        int tabSizeY = 370;
-
-
+    void CraftingScreen::Update_Alchemy() {
         //Render tabs
         for (int i = 0; i < 5; i++) {
             //Working
@@ -198,34 +162,34 @@ namespace GOTHIC_ENGINE {
             //delete btn;
 
             //Test View - working
-            //textBtnView->InsertBack("AlchemyScreen_Tab_Dark.tga");
-            //textBtnView->SetPos(tabPosX + i * (tabSizeX - 10), tabPosY);
-            //textBtnView->SetSize(tabSizeX, tabSizeY);
-            //if (IsCursorHovering(textBtnView)) {
-            //    //btn->view->InsertBack("AlchemyScreen_Tab_Light.tga");
-            //    textBtnView->SetColor(col_Transparent);
-            //}
-            //else {
-            //    //btn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
-            //    textBtnView->SetColor(zCOLOR(200, 165, 110));
-            //}
-            //view->InsertItem(textBtnView);
-            //textBtnView->Blit();
-            //view->RemoveItem(textBtnView);
-
-            //Test Btn
-            testBtn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
-            testBtn->view->SetPos(tabPosX + i * (tabSizeX - 10), tabPosY);
-            testBtn->view->SetSize(tabSizeX, tabSizeY);
-            if (IsCursorHovering(testBtn)) {
+            textBtnView->InsertBack("AlchemyScreen_Tab_Dark.tga");
+            textBtnView->SetPos(tabPosX + i * (tabSizeX - 10), tabPosY);
+            textBtnView->SetSize(tabSizeX, tabSizeY);
+            if (IsCursorHovering(textBtnView)) {
                 //btn->view->InsertBack("AlchemyScreen_Tab_Light.tga");
-                testBtn->view->SetColor(col_Transparent);
+                textBtnView->SetColor(col_Transparent);
             }
             else {
                 //btn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
-                testBtn->view->SetColor(zCOLOR(200, 165, 110));
+                textBtnView->SetColor(zCOLOR(200, 165, 110));
             }
-            CraftingView::RenderButton(testBtn);
+            view->InsertItem(textBtnView);
+            textBtnView->Blit();
+            view->RemoveItem(textBtnView);
+
+            //Test Btn
+            //testBtn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
+            //testBtn->view->SetPos(tabPosX + i * (tabSizeX - 10), tabPosY);
+            //testBtn->view->SetSize(tabSizeX, tabSizeY);
+            //if (IsCursorHovering(testBtn)) {
+            //    //btn->view->InsertBack("AlchemyScreen_Tab_Light.tga");
+            //    testBtn->view->SetColor(col_Transparent);
+            //}
+            //else {
+            //    //btn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
+            //    testBtn->view->SetColor(zCOLOR(200, 165, 110));
+            //}
+            //RenderButton(testBtn);
 
         }
 
@@ -242,8 +206,8 @@ namespace GOTHIC_ENGINE {
             C_RECIPE* rec = knownRecipes->GetSafe(i);
             oCItem* itm = new oCItem(rec->create_item, 1);
 
-            CraftingView::RenderButton(btn);
-            CraftingView::RenderItem(itm, itmBasePosX + gapX * i, itmBasePosY, itmSizeX, itmSizeY); //Here RenderItem increases itm->RefCtr by 2
+            RenderButton(btn);
+            RenderItem(itm, itmBasePosX + gapX * i, itmBasePosY, itmSizeX, itmSizeY); //Here RenderItem increases itm->RefCtr by 2
             itm->Release();
             delete btn; btn = nullptr;
         }
@@ -266,7 +230,7 @@ namespace GOTHIC_ENGINE {
             }
             txtV_ItemStats->Render();
             //Item model
-            CraftingView::RenderItem(selItm, 6300, 1700, itmSizeX * 1.7, itmSizeY * 1.7); //Here RenderItem does not increase itm->RefCtr
+            RenderItem(selItm, 6300, 1700, itmSizeX * 1.7, itmSizeY * 1.7); //Here RenderItem does not increase itm->RefCtr
             selItm->Release();
 
             //Ingredients required for the recipe
@@ -307,7 +271,7 @@ namespace GOTHIC_ENGINE {
                 RenderButton(ingrBtn);
 
                 oCItem* ingr = new oCItem(instance, 1);
-                CraftingView::RenderItem(ingr, ingrPosX, ingrPosY, ingrSizeX, ingrSizeY);
+                RenderItem(ingr, ingrPosX, ingrPosY, ingrSizeX, ingrSizeY);
                 
                 //If cursor is hovering over an ingredient, update the vars to render ingr name later below
                 if (IsCursorHovering(ingrBtn)) {
@@ -339,26 +303,27 @@ namespace GOTHIC_ENGINE {
 
     
 
-    void CraftingView::Update() {
-        if (!isOpen) return;
+    void CraftingScreen::Update() {
+        if (craftingScreen == nullptr) return;
         /*if (!ogame || ogame->IsOnPause()) {
             return;
         }*/
 
-        screen->InsertItem(view);
-        view->Blit();
+        screen->InsertItem(craftingScreen->view);
+        craftingScreen->view->Blit();
 
-        Update_Alchemy();   //TO DO: Add sth like if CraftingType == Alchemy, else if CraftingType == Smithing, etc.
+        craftingScreen->Update_Alchemy();   //TO DO: Add sth like if CraftingType == Alchemy, else if CraftingType == Smithing, etc.
 
-        screen->RemoveItem(view);
+        screen->RemoveItem(craftingScreen->view);
     }
 
-    void CraftingView::Open_Alchemy() {
-        isOpen = true;
-        view->InsertBack("AlchemyScreen_Background_1.tga");
+    void CraftingScreen::Open_Alchemy() {
+        craftingScreen = new CraftingScreen();
+        craftingScreen->view->InsertBack("AlchemyScreen_Background_1.tga");
+        
 
-        screen->InsertItem(view);
-        view->Blit();
+        screen->InsertItem(craftingScreen->view);
+        craftingScreen->view->Blit();
 
         zCPar_Symbol* knownRecipes_sym = parser->GetSymbol("KnownRecipes");
         int knownRecipes_max = parser->GetSymbol("KnownRecipes_Max")->single_intdata; 
@@ -372,29 +337,14 @@ namespace GOTHIC_ENGINE {
 
     }
 
-    void CraftingView::Close() {
-        isOpen = false;
-        /*if (renderItem_World) {
-            renderItem_World->Release();
-            renderItem_World = nullptr;
-        }*/
-        screen->RemoveItem(view);
-        for (Menu_Button* btn : CraftingView::childsArray) {
-            view->RemoveItem(btn->view);
-            delete btn; btn = nullptr;
-        }
+    void CraftingScreen::Close() {
+        screen->RemoveItem(craftingScreen->view);
         knownRecipes_Instances->Clear();
         knownRecipes->Clear();
-        CraftingView::childsArray.Clear();
         CursorStatic::Hide();
+        delete craftingScreen; craftingScreen = nullptr;
     }
 
-    void CraftingView::CallFuncForEachChild(zCView* child, void(zCView::* funcPtr)()) {
-        if (child == nullptr) return;                      //Call this function until the object is null
-        zCView* nextChild = child->next;                   //This points to the next object in the 'childs' list (needs to be here, as for a strange reason child->next changes after the function is called on the child)
-        (child->*funcPtr)();                               //Call the desired function
-        CallFuncForEachChild(nextChild, funcPtr);          //Call the same function on the next object
-    }
 
     void FillReqsFromString(C_RECIPE* recipe) {
         Array<zSTRING>* reqs = new Array<zSTRING>();
