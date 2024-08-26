@@ -33,40 +33,16 @@ namespace GOTHIC_ENGINE {
     Array<C_RECIPE>* knownRecipes = new Array<C_RECIPE>();
 
 
-
-    class Menu_Text {
-    public:
-        zSTRING text;
-        zCView* view = nullptr;
-        int posX = 0;
-        int posY = 0;
-        zCFont* font = nullptr;
-        int fontHeight = 0;
-        zCOLOR fontColor = zCOLOR(255, 255, 255, 255);
-
-        Menu_Text(zSTRING _text) {
-            text = _text;
-        }
-        Menu_Text(zSTRING _text, int _posX, int _posY) {
-            posX = _posX;
-            posY = _posY;
-        }
-        Menu_Text(zSTRING _text, int _posX, int _posY, zCOLOR _fontColor) {
-            fontColor = _fontColor;
-        }
-    };
-
-    
-
     class Menu_Button {
     public:
         zSTRING name;
         zCView* view = new zCView();
+        zCView* parentView = nullptr;
         int& posX = view->vposx;
         int& posY = view->vposy;
         int& sizeX = view->vsizex;
         int& sizeY = view->vsizey;
-        
+
         inline static int defaultSizeX = 400;
         inline static int defaultSizeY = 500;
         inline static int defaultTextOffsetX = 3500;    //Each zCView dimension is always 8192, so 4096 would be in the middle of the zCView
@@ -74,9 +50,12 @@ namespace GOTHIC_ENGINE {
         inline static zSTRING defaultBackTex = "AlchemyScreen_Tab2_Dark.tga";
 
         Menu_Button();
+        Menu_Button(zCView* _parentView, int _sizeX, int _sizeY, zSTRING backTex);
         Menu_Button(int posX, int posY, zSTRING text, zCOLOR textColor);
         Menu_Button(int posX, int posY, int sizeX, int sizeY, zSTRING text, zCOLOR textColor);
-
+        
+        void Render();
+        void SetPos(int x, int y);
 
     };
     
@@ -162,13 +141,20 @@ namespace GOTHIC_ENGINE {
             textView->textLines.DeleteList();
         }
     };
-
     class CraftingScreen {
     public:
         zCView* view;
         zCWorld* renderItem_World;
         int selectedRecipeInd = -1;
+        int NUM_OF_TABS = 0;
+        Array<bool> selectedTabInd;
+        bool notEnoughIngredients = false;
         Menu_TextView* txtV_ItemStats;
+        Menu_Button* btn_RecItems;
+        Menu_Button* btn_Make;
+        Menu_Button* btn_Quit;
+        Menu_Button* btn_Tabs;
+        Menu_Button* btn_Ingr;
 
         CraftingScreen();
 
@@ -198,11 +184,21 @@ namespace GOTHIC_ENGINE {
         int itmCenterX = 6725;
         int itmCenterY = 2175;
         int radius = 600;
+        //Make and Quit buttons values
+        int makePosX = 4500;
+        int quitPosX = 3300;
+        int makePosY = 1000;
+        int makeSizeX = 350;
+        int makeSizeY = 570;
         //Tab values
         int tabPosX = 500;
         int tabPosY = 300;
         int tabSizeX = 250;
         int tabSizeY = 370;
+        //Ingredients values
+        int ingrSizeX = itmSizeX * 0.6;
+        int ingrSizeY = itmSizeY * 0.6;
+        float bgSizeMult = 0.90f;
 
         void Update_Alchemy();
         void RenderButton(int posX, int posY, int sizeX, int sizeY, zSTRING text, zCOLOR textColor);

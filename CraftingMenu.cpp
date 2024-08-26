@@ -1,15 +1,7 @@
 // Supported with union (c) 2020 Union team
 // Union SOURCE file
-#include <cmath>
+#include <cmath> //for sin, cos
 namespace GOTHIC_ENGINE {
-    int GAPX = 100;
-    int GAPY = 200;
-    int navBar_x = 180;
-    int navBar_y = 500;
-    int btnSizeX = Menu_Button::defaultSizeX;
-    int btnSizeY = Menu_Button::defaultSizeY;
-    zCView* textBtnView = new zCView();
-    //Menu_Button* testBtn = new Menu_Button();
     zCOLOR col_Orange = zCOLOR(255, 100, 0);            //Ingredient name on label
     zCOLOR col_RedDark = zCOLOR(167, 11, 11);           //If not enough ingredients
     zCOLOR col_Green = zCOLOR(22, 114, 22);             //If enough ingredients
@@ -36,6 +28,11 @@ namespace GOTHIC_ENGINE {
         view->SetSize(defaultSizeX, defaultSizeY);
         view->SetPos(0, 0);
     }
+    Menu_Button::Menu_Button(zCView* _parentView, int _sizeX, int _sizeY, zSTRING backTex) {
+        parentView = _parentView;
+        view->InsertBack(backTex);
+        view->SetSize(_sizeX, _sizeY);
+    }
     Menu_Button::Menu_Button(int posX, int posY, zSTRING text = "", zCOLOR textColor = zCOLOR(255, 255, 255)) : Menu_Button::Menu_Button() {
         view->SetPos(posX, posY);
         view->CreateText(defaultTextOffsetX, defaultTextOffsetY, text, 50, textColor, 0, 1);
@@ -44,6 +41,17 @@ namespace GOTHIC_ENGINE {
         view->SetSize(sizeX, sizeY);
     }
 
+    void Menu_Button::Render() {
+        if (parentView == nullptr) return;
+        parentView->InsertItem(view);
+        view->Blit();
+        parentView->RemoveItem(view);
+    }
+    void Menu_Button::SetPos(int x, int y) {
+        posX = x;
+        posY = y;
+    }
+    
     CraftingScreen::CraftingScreen() {
         renderItem_World = zfactory->CreateWorld();
         #if ENGINE == Engine_G2A
@@ -52,15 +60,15 @@ namespace GOTHIC_ENGINE {
 
         view = new zCView(0, 0, 8192, 8192);
         txtV_ItemStats = new Menu_TextView(view);
+        btn_RecItems = new Menu_Button(view, itmSizeX / boxSizeXDivide, itmSizeY / boxSizeYDivide, "AlchemyScreen_Item_Bg.tga");
+        btn_Make = new Menu_Button(view, makeSizeX, makeSizeY, "AlchemyScreen_Make.tga");
+        btn_Quit = new Menu_Button(view, makeSizeX, makeSizeY, "AlchemyScreen_Quit.tga");
+        btn_Tabs = new Menu_Button(view, tabSizeX, tabSizeY, "AlchemyScreen_Tab_Dark.tga");
+        btn_Ingr = new Menu_Button(view, ingrSizeX * bgSizeMult, ingrSizeY * bgSizeMult, "AlchemyScreen_Ingr_Bg.tga");
     }
 
 
     void CraftingScreen::RenderButton(Menu_Button* btn) {
-        Menu_Button::defaultTextOffsetX = 2500;
-
-        btn->view->SetPos(btn->posX, btn->posY);
-        btn->view->SetSize(btn->sizeX, btn->sizeY);
-
         view->InsertItem(btn->view);
         btn->view->Blit();
         view->RemoveItem(btn->view);
@@ -143,73 +151,67 @@ namespace GOTHIC_ENGINE {
     }
 
     void CraftingScreen::Update_Alchemy() {
+        //Render Quit and Make buttons
+        btn_Make->SetPos(4550, 880);
+        btn_Make->view->SetSize(300, 500);
+        if (IsCursorHovering(btn_Make)) { btn_Make->view->SetColor(zCOLOR(225, 255, 225)); }
+        else                            { btn_Make->view->SetColor(zCOLOR(200, 240, 200)); }
+        //Below is working
+        /*if (IsClicked(btn_Make) && selectedRecipeInd >= 0) {
+            C_RECIPE* selRec = knownRecipes->GetSafe(selectedRecipeInd);
+            oCItem* selItm = new oCItem(selRec->create_item, 1);
+            player->inventory2.Insert(selItm);
+            selItm->Release();
+        }*/
+        btn_Make->Render();
+
+        btn_Quit->SetPos(3300, 880);
+        btn_Quit->view->SetSize(300, 500);
+        if (IsCursorHovering(btn_Quit)) { btn_Quit->view->SetColor(zCOLOR(255, 225, 225)); }
+        else                            { btn_Quit->view->SetColor(zCOLOR(240, 200, 200)); }
+        if (IsClicked(btn_Quit)) { 
+            CraftingScreen::Close(); 
+            return; 
+        }
+        btn_Quit->Render();
+
         //Render tabs
-        for (int i = 0; i < 5; i++) {
-            //Working
-            //Menu_Button::defaultBackTex = "AlchemyScreen_Tab_Dark.tga";
-            //Menu_Button* btn = new Menu_Button(tabPosX + i * (tabSizeX - 10), tabPosY, tabSizeX, tabSizeY);
+        for (int i = 0; i < NUM_OF_TABS; i++) {
+            btn_Tabs->SetPos(tabPosX + i * (tabSizeX - 10), tabPosY);
+            btn_Tabs->view->InsertBack("AlchemyScreen_Tab_" + (zSTRING)i);
+            if (IsClicked(btn_Tabs)) {
+                bool* b = selectedTabInd.GetSafe(i);
+                *b = !*b;
+            }
 
-            //if (IsCursorHovering(btn)) {
-            //    //btn->view->InsertBack("AlchemyScreen_Tab_Light.tga");
-            //    btn->view->SetColor(col_Transparent);
-            //}
-            //else {
-            //    //btn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
-            //    btn->view->SetColor(zCOLOR(200, 165, 110));
-            //}
-
-            //CraftingView::RenderButton(btn);
-            //delete btn;
-
-            //Test View - working
-            textBtnView->InsertBack("AlchemyScreen_Tab_Dark.tga");
-            textBtnView->SetPos(tabPosX + i * (tabSizeX - 10), tabPosY);
-            textBtnView->SetSize(tabSizeX, tabSizeY);
-            if (IsCursorHovering(textBtnView)) {
-                //btn->view->InsertBack("AlchemyScreen_Tab_Light.tga");
-                textBtnView->SetColor(col_Transparent);
+            if (*selectedTabInd.GetSafe(i) == true) {
+                btn_Tabs->view->SetColor(col_Transparent);
             }
             else {
-                //btn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
-                textBtnView->SetColor(zCOLOR(200, 165, 110));
+                if (IsCursorHovering(btn_Tabs)) {
+                    btn_Tabs->view->SetColor(zCOLOR(250, 215, 150));
+                }
+                else {
+                    btn_Tabs->view->SetColor(zCOLOR(200, 165, 110));
+                }
             }
-            view->InsertItem(textBtnView);
-            textBtnView->Blit();
-            view->RemoveItem(textBtnView);
-
-            //Test Btn
-            //testBtn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
-            //testBtn->view->SetPos(tabPosX + i * (tabSizeX - 10), tabPosY);
-            //testBtn->view->SetSize(tabSizeX, tabSizeY);
-            //if (IsCursorHovering(testBtn)) {
-            //    //btn->view->InsertBack("AlchemyScreen_Tab_Light.tga");
-            //    testBtn->view->SetColor(col_Transparent);
-            //}
-            //else {
-            //    //btn->view->InsertBack("AlchemyScreen_Tab_Dark.tga");
-            //    testBtn->view->SetColor(zCOLOR(200, 165, 110));
-            //}
-            //RenderButton(testBtn);
-
+            btn_Tabs->Render();
         }
 
         //Render item for each known recipe (left side of the screen)
         for (int i = 0; i < knownRecipes->GetNum(); i++) {
-            Menu_Button::defaultBackTex = "AlchemyScreen_Item_Bg.tga";
-            Menu_Button* btn = new Menu_Button(itmBasePosX + (itmSizeX * boxPosXOffsetMult) + gapX * i, itmBasePosY + (itmSizeY * boxPosYOffsetMult), itmSizeX / boxSizeXDivide, itmSizeY / boxSizeYDivide);
-            //btn->name = "RecBtn_" + (zSTRING)(*knownRecipes_Instances->GetSafe(i));
-
-            if (IsCursorHovering(btn) && zinput->GetMouseButtonPressedLeft() == 1) {
+            btn_RecItems->SetPos(itmBasePosX + (itmSizeX * boxPosXOffsetMult) + gapX * i, itmBasePosY + (itmSizeY * boxPosYOffsetMult));
+            if (IsCursorHovering(btn_RecItems) && zinput->GetMouseButtonPressedLeft() == 1) {
                 selectedRecipeInd = i;
             }
+            btn_RecItems->Render();
 
             C_RECIPE* rec = knownRecipes->GetSafe(i);
             oCItem* itm = new oCItem(rec->create_item, 1);
 
-            RenderButton(btn);
             RenderItem(itm, itmBasePosX + gapX * i, itmBasePosY, itmSizeX, itmSizeY); //Here RenderItem increases itm->RefCtr by 2
             itm->Release();
-            delete btn; btn = nullptr;
+
         }
 
         //If a recipe from the left side of the screen is selected, render the right side (item model, stats, required ingredients).
@@ -231,7 +233,6 @@ namespace GOTHIC_ENGINE {
             txtV_ItemStats->Render();
             //Item model
             RenderItem(selItm, 6300, 1700, itmSizeX * 1.7, itmSizeY * 1.7); //Here RenderItem does not increase itm->RefCtr
-            selItm->Release();
 
             //Ingredients required for the recipe
             bool renderIngrLabel = false;
@@ -240,55 +241,58 @@ namespace GOTHIC_ENGINE {
             zSTRING renderIngrLabelName = "";
 
             int i = 0;
-            while (selRec->req_itm[i] > 0 && i < 9) {
+            notEnoughIngredients = false;
+            while (selRec->req_itm[i] > 0 && i < 9) { //TODO: i < 9 (change to < than array)
                 int instance = selRec->req_itm[i];
-                //oCItem* item = new oCItem(requiredItems->GetSafe(i)->instanz, 1); //Same as above
-                //RenderButton(ingrBasePosX + (itmSizeX * 0.30) + gapX * i, ingrBasePosY + (itmSizeY * 0.15), itmSizeX / 2.5, itmSizeY / 1.25);
-                //RenderItem(instance, ingrBasePosX + gapX * i, ingrBasePosY, itmSizeX*0.6, itmSizeY*0.6);
-                
+
                 //Values for displaying required ingredients in a circle
                 int ingrPosX = itmCenterX + radius * sin(3.14 + 6.28f / 9.0f * i);
                 int ingrPosY = itmCenterY + radius * 1.78f * cos(3.14 + 6.28f / 9.0f * i);
-                int ingrSizeX = itmSizeX * 0.6;
-                int ingrSizeY = itmSizeY * 0.6;
-                float bgSizeMult = 0.90f;
-                int bgPosOffsetX = ingrSizeX * (1 - bgSizeMult) / 2.0f; //If we make bg smaller, then we need to add to the pos the difference between ingr size and bg size and then divide it by 2
+                int bgPosOffsetX = ingrSizeX * (1 - bgSizeMult) / 2.0f; 
                 int bgPosOffsetY = ingrSizeY * (1 - bgSizeMult) / 2.0f;
 
-                Menu_Button::defaultBackTex = "AlchemyScreen_Ingr_Bg.tga";
-                Menu_Button* ingrBtn = new Menu_Button(ingrPosX + bgPosOffsetX, ingrPosY + bgPosOffsetY, ingrSizeX * bgSizeMult, ingrSizeY * bgSizeMult);
-
+                //Check required and possesed items
                 player->inventory2.UnpackAllItems();
                 //auto it = player->IsInInv(ingr->objectName, 1);
-                int ingrNumber1 = player->inventory2.GetAmount(instance);
-                int ingrNumber2 = selRec->req_qty[i];
-                zCOLOR col1 = ingrNumber1 < ingrNumber2 ? zCOLOR(167, 11, 11) : zCOLOR(22, 114, 22);
+                int ingrAmountInInv = player->inventory2.GetAmount(instance);
+                int ingrAmountRequired = selRec->req_qty[i];
+                zCOLOR col1 = ingrAmountInInv < ingrAmountRequired ? zCOLOR(167, 11, 11) : zCOLOR(22, 114, 22);
                 zCOLOR col2 = zCOLOR(120, 71, 50); //(120, 71, 50) //179, 139, 92
-                
-                ingrBtn->view->CreateText(1500, 5000 + 800, ingrNumber1, 0, col1, 0, 1);   //Left-right: 1500, 5000; UppperRightCircle: 5200, 0; LeftUp-BottomRight: 1000, 0
-                ingrBtn->view->CreateText(5500, 5000 + 800, ingrNumber2, 0, col2, 0, 1); //Left-right: 5500, 5000; UppperRightCircle: 7000, 2000; LeftUp-BottomRight: 7000, 4000
+                notEnoughIngredients = ingrAmountRequired > ingrAmountInInv ? true : false;
+
+                //Render button
+                btn_Ingr->SetPos(ingrPosX + bgPosOffsetX, ingrPosY + bgPosOffsetY);
+                btn_Ingr->view->CreateText(1500, 5000 + 800, ingrAmountInInv, 0, col1, 0, 1);   //Left-right: 1500, 5000; UppperRightCircle: 5200, 0; LeftUp-BottomRight: 1000, 0
+                btn_Ingr->view->CreateText(5500, 5000 + 800, ingrAmountRequired, 0, col2, 0, 1); //Left-right: 5500, 5000; UppperRightCircle: 7000, 2000; LeftUp-BottomRight: 7000, 4000
                 //ingrBtn->view->CreateText(6100, 1000, "/ ", 0, zCOLOR(179, 139, 92), 0, 1);
-                RenderButton(ingrBtn);
+                btn_Ingr->Render();
 
                 oCItem* ingr = new oCItem(instance, 1);
                 RenderItem(ingr, ingrPosX, ingrPosY, ingrSizeX, ingrSizeY);
                 
                 //If cursor is hovering over an ingredient, update the vars to render ingr name later below
-                if (IsCursorHovering(ingrBtn)) {
+                if (IsCursorHovering(btn_Ingr)) {
                     renderIngrLabel = true;
-                    //Option 1 - name label displayed to the left as much as needed, if it would be off screen
-                    //renderIngrLabelX = ingrPosX + bgPosOffsetX + ingrSizeX / 2;
-                    //int offsetXIfOffScreen = renderIngrLabelX + 1250 - 8192;
-                    //renderIngrLabelX = offsetXIfOffScreen > 0 ? renderIngrLabelX - offsetXIfOffScreen : renderIngrLabelX;
-                    //Option 2 - name label always displayed in the middle
+                    //Label always displayed in the middle
                     renderIngrLabelX = ingrPosX + bgPosOffsetY + ingrSizeX / 2 - 1250 / 2;
                     renderIngrLabelY = ingrPosY + bgPosOffsetY - ingrSizeY / 2;
                     renderIngrLabelName = ingr->description;
                 }
                 i++;
                 ingr->Release();
-                delete ingrBtn;
             }
+            if (IsClicked(btn_Make) && notEnoughIngredients == false) {
+                player->inventory2.Insert(selItm);
+                int j = 0;
+                while (selRec->req_itm[j] > 0 && j < 9) { //TODO: i < 9 (change to < than array)
+                    player->inventory2.Remove(selRec->req_itm[j], selRec->req_qty[j]);
+                    j++;
+                }
+                //To remove items:
+                //player->inventory2.Remove(selRec->create_item, 3);
+                //player->inventory2.RemoveByPtr(selItm, 3);
+            }
+            selItm->Release();
             //Display ingredient name when hovering
             if (renderIngrLabel) {
                 Menu_Button::defaultBackTex = "AlchemyScreen_Ingr_NameLabel.tga";
@@ -314,14 +318,21 @@ namespace GOTHIC_ENGINE {
 
         craftingScreen->Update_Alchemy();   //TO DO: Add sth like if CraftingType == Alchemy, else if CraftingType == Smithing, etc.
 
+        //This line needs to be here, as closing the crafting screen after clicking on quit button happens in Update_Alchemy()
+        //And if that happens cragting screen is already nullptr and is already removed from screen.
+        if (craftingScreen == nullptr) return; 
         screen->RemoveItem(craftingScreen->view);
     }
 
     void CraftingScreen::Open_Alchemy() {
+        if (craftingScreen != nullptr) return; //If somehow it already exists, don't make a new one
         craftingScreen = new CraftingScreen();
-        craftingScreen->view->InsertBack("AlchemyScreen_Background_1.tga");
+        craftingScreen->view->InsertBack("AlchemyScreen_Background.tga");
+        craftingScreen->NUM_OF_TABS = 6;
+        for (int i = 0; i < craftingScreen->NUM_OF_TABS; i++) {
+            craftingScreen->selectedTabInd.Insert(false);
+        }
         
-
         screen->InsertItem(craftingScreen->view);
         craftingScreen->view->Blit();
 
@@ -329,6 +340,7 @@ namespace GOTHIC_ENGINE {
         int knownRecipes_max = parser->GetSymbol("KnownRecipes_Max")->single_intdata; 
         int* knownRecipes_parser = (int*)knownRecipes_sym->adr;                         //Address of the array
         for (int i = 0; i < knownRecipes_sym->ele; i++) {
+            if (knownRecipes_parser[i] <= 0) continue;
             knownRecipes_Instances->InsertEnd(knownRecipes_parser[i]);
             knownRecipes->InsertEnd(C_RECIPE(knownRecipes_parser[i]));
         }
@@ -338,6 +350,7 @@ namespace GOTHIC_ENGINE {
     }
 
     void CraftingScreen::Close() {
+        if (craftingScreen == nullptr) return; //If somehow it already doesn't exist, don't delete it again
         screen->RemoveItem(craftingScreen->view);
         knownRecipes_Instances->Clear();
         knownRecipes->Clear();
